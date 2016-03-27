@@ -1,4 +1,4 @@
-package sk.bocko.matrixcalc.error;
+package sk.bocko.matrixcalc.model;
 
 /**
  * Contains error message returned by the Rest service when an error occures.
