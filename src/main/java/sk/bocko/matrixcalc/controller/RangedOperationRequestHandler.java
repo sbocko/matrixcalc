@@ -1,7 +1,6 @@
 package sk.bocko.matrixcalc.controller;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import com.sun.istack.internal.Nullable;
 import java.util.Optional;
 import java.util.function.Function;
 import org.json.JSONObject;
@@ -28,7 +27,7 @@ public class RangedOperationRequestHandler implements UnaryOperationRequestHandl
      */
     @Override
     public JSONObject handle(final String body,
-        final @Nullable String range,
+        final String range,
         final String operation) {
         checkNotNull(body, "request body is null");
 
