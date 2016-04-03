@@ -1,9 +1,12 @@
 package sk.bocko.matrixcalc.controller;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,9 +24,19 @@ public class RangedOperationController {
     private static final Logger LOG =
         LoggerFactory.getLogger(RangedOperationController.class);
 
-    private final RangedOperationRequestHandler handler =
-        new RangedOperationRequestHandler();
+    private final UnaryOperationRequestHandler handler;
 
+    @Autowired
+    public RangedOperationController(
+        @Qualifier(value = "unary_matrix_operation")
+            UnaryOperationRequestHandler handler) {
+        this.handler = checkNotNull(handler, "handler is null");
+    }
+
+    /**
+     * Process requests for range operations as specified here:
+     * http://docs.matrixcalc.apiary.io/#reference/ranged-operations
+     */
     @RequestMapping(
         value = "/rest/{operation:sum|product|max|min|average}",
         produces = "application/json",

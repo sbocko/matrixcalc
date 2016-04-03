@@ -21,14 +21,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import sk.bocko.matrixcalc.Application;
 import sk.bocko.matrixcalc.HttpGetWithEntity;
-import static sk.bocko.matrixcalc.TestUtils.aBody;
-import static sk.bocko.matrixcalc.TestUtils.anOperandIndex;
-import static sk.bocko.matrixcalc.TestUtils.aBinaryOperation;
+import static sk.bocko.matrixcalc.TestUtils.aRange;
+import static sk.bocko.matrixcalc.TestUtils.anUnaryOperation;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)
 @WebIntegrationTest("server.port:8888")
-public class BinaryOperationControllerIntegrationTest {
+public class RangedOperationControllerIntegrationTest {
 
     private static final String URL = "http://localhost:8888/rest/";
 
@@ -41,7 +40,7 @@ public class BinaryOperationControllerIntegrationTest {
         String empty = "";
 
         // when
-        CloseableHttpResponse actual = makeRequest(empty, aBinaryOperation(), anOperandIndex(), anOperandIndex());
+        CloseableHttpResponse actual = makeRequest(empty, anUnaryOperation(), aRange());
 
         // then
         int expectedStatusCode = HttpStatus.UNPROCESSABLE_ENTITY.value();
@@ -54,12 +53,12 @@ public class BinaryOperationControllerIntegrationTest {
     }
 
     @Test
-    public void testAdditionReturnsErrorResponseWhenMatrixIsMissing() throws IOException {
+    public void testSumReturnsErrorResponseWhenMatrixIsMissing() throws IOException {
         // given
         String withoutMatrix = "{\"attribute\": \"value\"}";
 
         // when
-        CloseableHttpResponse actual = makeRequest(withoutMatrix, aBinaryOperation(), anOperandIndex(), anOperandIndex());
+        CloseableHttpResponse actual = makeRequest(withoutMatrix, anUnaryOperation(), aRange());
 
         // then
         int expectedStatusCode = HttpStatus.UNPROCESSABLE_ENTITY.value();
@@ -72,12 +71,12 @@ public class BinaryOperationControllerIntegrationTest {
     }
 
     @Test
-    public void testAdditionReturnsErrorResponseWhenContentIsNotJson() throws IOException {
+    public void testSumReturnsErrorResponseWhenContentIsNotJson() throws IOException {
         // given
         String withoutMatrix = "not a json";
 
         // when
-        CloseableHttpResponse actual = makeRequest(withoutMatrix, aBinaryOperation(), anOperandIndex(), anOperandIndex());
+        CloseableHttpResponse actual = makeRequest(withoutMatrix, anUnaryOperation(), aRange());
 
         // then
         int expectedStatusCode = HttpStatus.UNPROCESSABLE_ENTITY.value();
@@ -90,12 +89,12 @@ public class BinaryOperationControllerIntegrationTest {
     }
 
     @Test
-    public void testAdditionReturnsErrorResponseWhenMatrixHasInvalidType() throws IOException {
+    public void testSumReturnsErrorResponseWhenMatrixHasInvalidType() throws IOException {
         // given
         String notAMatrix = "{\"matrix\": true}";
 
         // when
-        CloseableHttpResponse actual = makeRequest(notAMatrix, aBinaryOperation(), anOperandIndex(), anOperandIndex());
+        CloseableHttpResponse actual = makeRequest(notAMatrix, anUnaryOperation(), aRange());
 
         // then
         int expectedStatusCode = HttpStatus.UNPROCESSABLE_ENTITY.value();
@@ -108,12 +107,12 @@ public class BinaryOperationControllerIntegrationTest {
     }
 
     @Test
-    public void testAdditionReturnsErrorResponseWhenMatrixIsEmpty() throws IOException {
+    public void testSumReturnsErrorResponseWhenMatrixIsEmpty() throws IOException {
         // given
         String notAMatrix = "{\"matrix\": []}";
 
         // when
-        CloseableHttpResponse actual = makeRequest(notAMatrix, aBinaryOperation(), anOperandIndex(), anOperandIndex());
+        CloseableHttpResponse actual = makeRequest(notAMatrix, anUnaryOperation(), aRange());
 
         // then
         int expectedStatusCode = HttpStatus.UNPROCESSABLE_ENTITY.value();
@@ -126,7 +125,7 @@ public class BinaryOperationControllerIntegrationTest {
     }
 
     @Test
-    public void testAdditionReturnsErrorResponseWhenMatrixIsNotRectangular() throws IOException {
+    public void testSumReturnsErrorResponseWhenMatrixIsNotRectangular() throws IOException {
         // given
         String matrix = "[[1.0, 2.0, 3.0],"
             + " [4.0, 5.0, 6.0, 7.0]," // 4 elements in 3x3 matrix
@@ -134,7 +133,7 @@ public class BinaryOperationControllerIntegrationTest {
         String notRectangular = "{\"matrix\": " + matrix + "}";
 
         // when
-        CloseableHttpResponse actual = makeRequest(notRectangular, aBinaryOperation(), anOperandIndex(), anOperandIndex());
+        CloseableHttpResponse actual = makeRequest(notRectangular, anUnaryOperation(), aRange());
 
         // then
         int expectedStatusCode = HttpStatus.UNPROCESSABLE_ENTITY.value();
@@ -147,13 +146,13 @@ public class BinaryOperationControllerIntegrationTest {
     }
 
     @Test
-    public void testAdditionReturnsErrorResponseWhenMatrixIsNotNumeric() throws IOException {
+    public void testSumReturnsErrorResponseWhenMatrixIsNotNumeric() throws IOException {
         // given
         String matrix = "[[1, a],[3, 4]]";
         String notNumeric = "{\"matrix\": " + matrix + "}";
 
         // when
-        CloseableHttpResponse actual = makeRequest(notNumeric, aBinaryOperation(), anOperandIndex(), anOperandIndex());
+        CloseableHttpResponse actual = makeRequest(notNumeric, anUnaryOperation(), aRange());
 
         // then
         int expectedStatusCode = HttpStatus.UNPROCESSABLE_ENTITY.value();
@@ -166,137 +165,97 @@ public class BinaryOperationControllerIntegrationTest {
     }
 
     @Test
-    public void testProcessShouldHandleAdditionCorrectly() throws Exception {
+    public void testProcessShouldHandleSummationCorrectly() throws Exception {
         // given
         final String body = "{\"matrix\":[[1,2.1],[3.3,4]]}";
-        final String firstOperandIndex = "1-2"; // 2.1
-        final String secondOperandIndex = "2-1"; // 3.3
-        final String operation = "add";
+        final String argument = "1-x";
+        final String operation = "sum";
 
         // when
-        CloseableHttpResponse actual = makeRequest(body, operation, firstOperandIndex, secondOperandIndex);
+        CloseableHttpResponse actual = makeRequest(body, operation, argument);
 
         //then
         assertThat(actual.getStatusLine().getStatusCode(), is(HttpStatus.OK.value()));
 
         String actualContent = IOUtils.toString(actual.getEntity().getContent());
-        String expectedContent = "{\"result\":5.4}";
+        String expectedContent = "{\"result\":3.1}";
         assertThat(actualContent, is(expectedContent));
     }
 
     @Test
-    public void testProcessShouldHandleSubtractionCorrectly() throws Exception {
-        // given
-        final String body = "{\"matrix\":[[1,2.25],[3,4]]}";
-        final String firstOperandIndex = "1-2"; // 2.25
-        final String secondOperandIndex = "2-1"; // 3
-        final String operation = "subtract";
-
-        // when
-        CloseableHttpResponse actual = makeRequest(body, operation, firstOperandIndex, secondOperandIndex);
-
-        //then
-        assertThat(actual.getStatusLine().getStatusCode(), is(HttpStatus.OK.value()));
-
-        String actualContent = IOUtils.toString(actual.getEntity().getContent());
-        String expectedContent = "{\"result\":-0.75}";
-        assertThat(actualContent, is(expectedContent));
-    }
-
-    @Test
-    public void testProcessShouldHandleMultiplicationCorrectly() throws Exception {
+    public void testProcessShouldHandleProductCorrectly() throws Exception {
         // given
         final String body = "{\"matrix\":[[1,2.1],[3.3,4]]}";
-        final String firstOperandIndex = "1-2"; // 2.1
-        final String secondOperandIndex = "2-1"; // 3.3
-        final String operation = "multiply";
+        final String argument = "2-x";
+        final String operation = "product";
 
         // when
-        CloseableHttpResponse actual = makeRequest(body, operation, firstOperandIndex, secondOperandIndex);
+        CloseableHttpResponse actual = makeRequest(body, operation, argument);
 
         //then
         assertThat(actual.getStatusLine().getStatusCode(), is(HttpStatus.OK.value()));
 
         String actualContent = IOUtils.toString(actual.getEntity().getContent());
-        String expectedContent = "{\"result\":6.93}";
+        String expectedContent = "{\"result\":13.2}";
         assertThat(actualContent, is(expectedContent));
     }
 
     @Test
-    public void testProcessShouldHandleDivisionCorrectly() throws Exception {
+    public void testProcessShouldHandleMinimumCorrectly() throws Exception {
         // given
-        final String body = "{\"matrix\":[[1,2],[3.3,4]]}";
-        final String firstOperandIndex = "1-2"; // 2
-        final String secondOperandIndex = "2-2"; // 4
-        final String operation = "divide";
+        final String body = "{\"matrix\":[[1,2.1],[3.3,4]]}";
+        final String argument = "x-1";
+        final String operation = "min";
 
         // when
-        CloseableHttpResponse actual = makeRequest(body, operation, firstOperandIndex, secondOperandIndex);
+        CloseableHttpResponse actual = makeRequest(body, operation, argument);
 
         //then
         assertThat(actual.getStatusLine().getStatusCode(), is(HttpStatus.OK.value()));
 
         String actualContent = IOUtils.toString(actual.getEntity().getContent());
-        String expectedContent = "{\"result\":0.5}";
+        String expectedContent = "{\"result\":1}";
         assertThat(actualContent, is(expectedContent));
     }
 
     @Test
-    public void testProcessShouldReturnErrorWhenInvalidMatrix() throws Exception {
+    public void testProcessShouldHandleMaximumCorrectly() throws Exception {
         // given
-        final String body = "{\"matrix\": 42";
+        final String body = "{\"matrix\":[[1,2.1],[3.3,4]]}";
+        final String argument = "x-2";
+        final String operation = "max";
 
         // when
-        CloseableHttpResponse actual = makeRequest(body, aBinaryOperation(), anOperandIndex(), anOperandIndex());
+        CloseableHttpResponse actual = makeRequest(body, operation, argument);
 
-        // then
-        int expectedStatusCode = HttpStatus.UNPROCESSABLE_ENTITY.value();
-        int actualStatusCode = actual.getStatusLine().getStatusCode();
-        assertThat(actualStatusCode, is(expectedStatusCode));
+        //then
+        assertThat(actual.getStatusLine().getStatusCode(), is(HttpStatus.OK.value()));
 
         String actualContent = IOUtils.toString(actual.getEntity().getContent());
-        String expectedContent = "{\"error\":\"Request body is not a valid json: Expected a ',' or '}' at 14 [character 15 line 1]\"}";
+        String expectedContent = "{\"result\":4}";
         assertThat(actualContent, is(expectedContent));
     }
 
     @Test
-    public void testProcessShouldReturnNotFoundWhenInvalidOperation() throws Exception {
+    public void testProcessShouldHandleAverageCorrectly() throws Exception {
         // given
-        final String invalid = "invalidOperation";
+        final String body = "{\"matrix\":[[1,2.1],[3.3,4]]}";
+        final String argument = "x-2";
+        final String operation = "average";
 
         // when
-        CloseableHttpResponse actual = makeRequest(aBody(), invalid, anOperandIndex(), anOperandIndex());
+        CloseableHttpResponse actual = makeRequest(body, operation, argument);
 
-        // then
-        int expectedStatusCode = HttpStatus.NOT_FOUND.value();
-        int actualStatusCode = actual.getStatusLine().getStatusCode();
-        assertThat(actualStatusCode, is(expectedStatusCode));
-    }
-
-    @Test
-    public void testProcessShouldReturnErrorWhenResultIsInfinite() throws Exception {
-        // given
-        final String body = "{\"matrix\":[[1," + Double.MAX_VALUE + "]," +
-            "[" + Double.MAX_VALUE + ",4]]}";
-        final String firstOperandIndex = "1-2"; // Double.MAX_VALUE
-        final String secondOperandIndex = "2-1"; // Double.MAX_VALUE
-        final String operation = "add";
-
-        // when
-        CloseableHttpResponse actual = makeRequest(body, operation, firstOperandIndex, secondOperandIndex);
-
-        // then
-        int expectedStatusCode = HttpStatus.UNPROCESSABLE_ENTITY.value();
-        int actualStatusCode = actual.getStatusLine().getStatusCode();
-        assertThat(actualStatusCode, is(expectedStatusCode));
+        //then
+        assertThat(actual.getStatusLine().getStatusCode(), is(HttpStatus.OK.value()));
 
         String actualContent = IOUtils.toString(actual.getEntity().getContent());
-        String expectedContent = "{\"error\":\"result is not a finite number\"}";
+        String expectedContent = "{\"result\":3.05}";
         assertThat(actualContent, is(expectedContent));
     }
 
-    private CloseableHttpResponse makeRequest(String content, String operation, String firstOperandIndex, String secondOperandIndex) {
-        String params = firstOperandIndex + "/" + secondOperandIndex;
+    private CloseableHttpResponse makeRequest(String content, String operation, String argument) {
+        String params = "?range=" + argument;
         HttpRequestBase request = createRequest(content, operation, params);
         CloseableHttpClient client = HttpClientBuilder.create().build();
 
@@ -310,7 +269,7 @@ public class BinaryOperationControllerIntegrationTest {
     }
 
     private HttpRequestBase createRequest(String content, String operation, String urlParams) {
-        HttpGetWithEntity request = new HttpGetWithEntity(URL + operation + "/" + urlParams);
+        HttpGetWithEntity request = new HttpGetWithEntity(URL + operation + urlParams);
 
         request.setHeader("Content-Type", "application/json");
         HttpEntity body = new StringEntity(content, Charset.forName("UTF-8"));

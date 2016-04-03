@@ -13,7 +13,15 @@ public final class TestUtils {
         return "{\"matrix\":[[1,2],[3.4,4]]}";
     }
 
-    public static String anOperation() {
+    public static String aBinaryOperation() {
         return "add";
+    }
+
+    public static String anUnaryOperation() {
+        return "sum";
+    }
+
+    public static String aRange() {
+        return "1-x";
     }
 }

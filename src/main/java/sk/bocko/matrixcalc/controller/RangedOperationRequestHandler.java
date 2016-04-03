@@ -1,19 +1,36 @@
 package sk.bocko.matrixcalc.controller;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import com.sun.istack.internal.Nullable;
 import java.util.Optional;
 import java.util.function.Function;
 import org.json.JSONObject;
+import org.springframework.stereotype.Service;
 import sk.bocko.matrixcalc.model.Matrix;
 import sk.bocko.matrixcalc.model.Range;
 import sk.bocko.matrixcalc.model.RangedOperation;
 
-public class RangedOperationRequestHandler {
+/**
+ * Matrix implementation of {@link UnaryOperationRequestHandler}.
+ */
+@Service("unary_matrix_operation")
+public class RangedOperationRequestHandler implements UnaryOperationRequestHandler {
     private static final String MATRIX = "matrix";
     private static final String RESULT = "result";
 
-    JSONObject handle(final String body,
-        final String range,
+    /**
+     * Handles unary matrix operations.
+     * @param body request body
+     * @param range range of the matrix to apply operation on.
+     * Whole matrix if null.
+     * @param operation operation to perform on operand
+     * @return
+     */
+    @Override
+    public JSONObject handle(final String body,
+        final @Nullable String range,
         final String operation) {
+        checkNotNull(body, "request body is null");
 
         Matrix matrix = parseMatrix(body);
         Function<double[], Double> toApply = RangedOperation

@@ -1,9 +1,12 @@
 package sk.bocko.matrixcalc.controller;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,9 +23,19 @@ public class BinaryOperationController {
     private static final Logger LOG =
         LoggerFactory.getLogger(BinaryOperationController.class);
 
-    private final BinaryOperationRequestHandler handler =
-        new BinaryOperationRequestHandler();
+    private BinaryOperationRequestHandler handler;
 
+    @Autowired
+    public BinaryOperationController(
+        @Qualifier(value = "binary_matrix_operation")
+            BinaryOperationRequestHandler handler) {
+        this.handler = checkNotNull(handler, "handler is null");
+    }
+
+    /**
+     * Process requests for binary operations as specified here:
+     * http://docs.matrixcalc.apiary.io/#reference/simple-operations-with-two-operands/
+     */
     @RequestMapping(
         value = "/rest/{operation:add|subtract|multiply|divide}/{firstAddentIndex}/{secondAddentIndex}",
         produces = "application/json",

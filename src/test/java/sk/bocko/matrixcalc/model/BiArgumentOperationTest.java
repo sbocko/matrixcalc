@@ -17,7 +17,7 @@ public class BiArgumentOperationTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Test
-    public void testShouldCreateEnumFromStringForAddition() throws Exception {
+    public void testShouldCreateEnumFromStringForAddition() {
         // given
         String addition = "add";
 
@@ -29,7 +29,7 @@ public class BiArgumentOperationTest {
     }
 
     @Test
-    public void testShouldCreateEnumFromStringForSubtraction() throws Exception {
+    public void testShouldCreateEnumFromStringForSubtraction() {
         // given
         String subtraction = "subtract";
 
@@ -41,7 +41,7 @@ public class BiArgumentOperationTest {
     }
 
     @Test
-    public void testShouldCreateEnumFromStringForMultiplication() throws Exception {
+    public void testShouldCreateEnumFromStringForMultiplication() {
         // given
         String multiplication = "multiply";
 
@@ -53,7 +53,7 @@ public class BiArgumentOperationTest {
     }
 
     @Test
-    public void testShouldCreateEnumFromStringForDivision() throws Exception {
+    public void testShouldCreateEnumFromStringForDivision() {
         // given
         String division = "divide";
 
@@ -65,7 +65,7 @@ public class BiArgumentOperationTest {
     }
 
     @Test
-    public void testShouldThrowWhenUnknownOperation() throws Exception {
+    public void testShouldThrowWhenUnknownOperation() {
         // given
         String unsupported = "foo";
 
@@ -78,7 +78,7 @@ public class BiArgumentOperationTest {
     }
 
     @Test
-    public void testShouldThrowWhenNameIsNull() throws Exception {
+    public void testShouldThrowWhenNameIsNull() {
         // then
         thrown.expect(NullPointerException.class);
         thrown.expectMessage("name of the operation is null");

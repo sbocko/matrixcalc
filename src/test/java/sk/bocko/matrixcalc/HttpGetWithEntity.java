@@ -4,7 +4,7 @@ import java.net.URI;
 import org.apache.http.client.methods.HttpPost;
 
 /**
- * Created by stefan on 3/24/16.
+ * Helper class for testing Http.GET with request body.
  */
 public class HttpGetWithEntity extends HttpPost {
     private static final String METHOD_NAME = "GET";

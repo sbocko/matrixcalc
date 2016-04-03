@@ -9,14 +9,14 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import static sk.bocko.matrixcalc.TestUtils.aBody;
 import static sk.bocko.matrixcalc.TestUtils.anOperandIndex;
-import static sk.bocko.matrixcalc.TestUtils.anOperation;
+import static sk.bocko.matrixcalc.TestUtils.aBinaryOperation;
 
-public class BinaryOperationRequestHandlerTest {
+public class BinaryOperationRequestHandlerImplTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    private final BinaryOperationRequestHandler testee = new BinaryOperationRequestHandler();
+    private final BinaryOperationRequestHandlerImpl testee = new BinaryOperationRequestHandlerImpl();
 
     @Test
     public void testHandleShouldHandleAdditionCorrectly() throws Exception {
@@ -91,7 +91,7 @@ public class BinaryOperationRequestHandlerTest {
         thrown.expect(JSONException.class);
 
         // when
-        testee.handle(body, anOperandIndex(), anOperandIndex(), anOperation());
+        testee.handle(body, anOperandIndex(), anOperandIndex(), aBinaryOperation());
     }
 
     @Test
