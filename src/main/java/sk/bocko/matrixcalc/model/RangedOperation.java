@@ -9,9 +9,7 @@ import java.util.function.Function;
  */
 public enum RangedOperation {
     SUM(values -> Arrays.stream(values).sum()),
-    PRODUCT(values -> Arrays.stream(values)
-        .reduce((x, y) -> x * y)
-        .getAsDouble()),
+    PRODUCT(values -> Arrays.stream(values).reduce((x, y) -> x * y).getAsDouble()),
     MINIMUM(values -> Arrays.stream(values).min().getAsDouble()),
     MAXIMUM(values -> Arrays.stream(values).max().getAsDouble()),
     AVERAGE(values -> Arrays.stream(values).average().getAsDouble());

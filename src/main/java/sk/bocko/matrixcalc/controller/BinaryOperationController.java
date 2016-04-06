@@ -1,10 +1,9 @@
 package sk.bocko.matrixcalc.controller;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -16,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import sk.bocko.matrixcalc.log.RequestLogger;
 import sk.bocko.matrixcalc.model.ErrorResponse;
 
 @RestController
 public class BinaryOperationController {
-    private static final Logger LOG =
-        LoggerFactory.getLogger(BinaryOperationController.class);
+    private static final RequestLogger LOG = new RequestLogger(BinaryOperationController.class);
 
     private BinaryOperationRequestHandler handler;
 
@@ -41,6 +40,7 @@ public class BinaryOperationController {
         produces = "application/json",
         method = RequestMethod.GET)
     public String process(
+        HttpServletRequest request,
         @RequestBody String content,
         @PathVariable("operation") String operation,
         @PathVariable("firstAddentIndex") String firstAddentIndex,
@@ -49,29 +49,29 @@ public class BinaryOperationController {
         JSONObject result = handler
             .handle(content, firstAddentIndex, secondAddentIndex, operation);
 
-        LOG.info(result.toString());
+        LOG.logSuccessfulResponse(request, content, result.toString());
         return result.toString();
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    ErrorResponse handleMissingContent(HttpMessageNotReadableException e) {
-        LOG.error(e.getMessage());
+    ErrorResponse handleMissingContent(HttpServletRequest request, HttpMessageNotReadableException e) {
+        LOG.logError(request, e);
         return new ErrorResponse("Matrix is not present in request body.");
     }
 
     @ExceptionHandler(JSONException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    ErrorResponse handleInvalidContent(JSONException e) {
-        LOG.error(e.getMessage());
+    ErrorResponse handleInvalidContent(HttpServletRequest request, JSONException e) {
+        LOG.logError(request, e);
         return new ErrorResponse("Request body is not a valid json: "
             + e.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    ErrorResponse handleInvalidMatrix(Exception e) {
-        LOG.error(e.getMessage());
+    ErrorResponse handleInvalidMatrix(HttpServletRequest request, Exception e) {
+        LOG.logError(request, e);
         return new ErrorResponse(e.getMessage());
     }
 }
