@@ -95,7 +95,7 @@
                 <formatter>
                     <named-formatter name="PATTERN"/>
                 </formatter>
-                <file relative-to="jboss.server.sk.bocko.matrixcalc.log.dir" path="server.log"/>
+                <file relative-to="jboss.server.log.dir" path="server.log"/>
                 <suffix value=".yyyy-MM-dd"/>
                 <append value="true"/>
             </periodic-rotating-file-handler>
